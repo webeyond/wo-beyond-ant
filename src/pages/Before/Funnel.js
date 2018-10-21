@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
-import { routerRedux } from 'dva/router';
-import {ChartCard} from '@/components/Charts';
-import { Redirect } from 'react-router';
+import { ChartCard } from '@/components/Charts';
 import router from 'umi/router';
-
 // 引入 ECharts 主模块
 import echarts from 'echarts/lib/echarts';
 // 引入柱状图
@@ -13,19 +10,15 @@ import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/title';
 // 使用样式
 import 'echarts/theme/macarons';
-import styles from './Funnel.less';
-import $ from "jquery";
-import {connect} from "dva";
-
+import $ from 'jquery';
 
 class Funnel extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      orderscount: []
-    }
+      orderscount: [],
+    };
   }
-
 
   // goOrder (record){//页面跳转+参数
   //   this.props.dispatch(routerRedux.push({
@@ -35,33 +28,33 @@ class Funnel extends Component {
   // }
 
   componentDidMount() {
-    var funnelchart = echarts.init(document.getElementById('funnelchart'), "macarons");
+    var funnelchart = echarts.init(document.getElementById('funnelchart'), 'macarons');
     $.ajax({
-      type : "post",
-      url : "http://10.52.200.23/statistics/v1/selectSignFunnelCount",
-      contentType : "application/json; charset=utf-8",
-      datatype : "json",
-      data :JSON.stringify({})
-    }).then((data) => {
-
+      type: 'post',
+      url: 'http://10.52.200.23/statistics/v1/selectSignFunnelCount',
+      contentType: 'application/json; charset=utf-8',
+      datatype: 'json',
+      data: JSON.stringify({}),
+    }).then(data => {
       var funneloption = {
         title: {
           text: '订单漏斗图',
-          subtext: '各类型订单漏斗图展示'
+          subtext: '各类型订单漏斗图展示',
         },
         tooltip: {
           trigger: 'item',
-          formatter: "{a} <br/>{b} : {c}%"
+          formatter: '{a} <br/>{b} : {c}%',
         },
         toolbox: {
           feature: {
-            dataView: {readOnly: false},
+            dataView: { readOnly: false },
             restore: {},
-            saveAsImage: {}
-          }
+            saveAsImage: {},
+          },
         },
         legend: {
-          data: ['展现','点击','访问','咨询','订单']
+          top: '20',
+          data: ['意向', '目标', '开户', '首充', '存量'],
         },
         series: [
           {
@@ -71,30 +64,30 @@ class Funnel extends Component {
             width: '80%',
             label: {
               normal: {
-                formatter: '{b}预期'
+                formatter: '{b}预期',
               },
               emphasis: {
-                position:'inside',
-                formatter: '{b}预期: {c}%'
-              }
+                position: 'inside',
+                formatter: '{b}预期: {c}%',
+              },
             },
             labelLine: {
               normal: {
-                show: false
-              }
+                show: false,
+              },
             },
             itemStyle: {
               normal: {
-                opacity: 0.7
-              }
+                opacity: 0.7,
+              },
             },
             data: [
-              {value: 60, name: '访问'},
-              {value: 40, name: '咨询'},
-              {value: 20, name: '订单'},
-              {value: 80, name: '点击'},
-              {value: 100, name: '展现'}
-            ]
+              { value: 100, name: '意向' },
+              { value: 80, name: '目标' },
+              { value: 70, name: '开户' },
+              { value: 65, name: '首充' },
+              { value: 30, name: '存量' },
+            ],
           },
           {
             name: '实际',
@@ -107,50 +100,45 @@ class Funnel extends Component {
                 position: 'inside',
                 formatter: '{c}%',
                 textStyle: {
-                  color: '#fff'
-                }
+                  color: '#fff',
+                },
               },
               emphasis: {
-                position:'inside',
-                formatter: '{b}实际: {c}%'
-              }
+                position: 'inside',
+                formatter: '{b}实际: {c}%',
+              },
             },
             itemStyle: {
               normal: {
                 opacity: 0.5,
                 borderColor: '#fff',
-                borderWidth: 2
-              }
+                borderWidth: 2,
+              },
             },
             data: [
-              {value: 30, name: '访问'},
-              {value: 10, name: '咨询'},
-              {value: 5, name: '订单'},
-              {value: 50, name: '点击'},
-              {value: 80, name: '展现'}
-            ]
-          }
-        ]
+              { value: 80, name: '意向' },
+              { value: 70, name: '目标' },
+              { value: 65, name: '开户' },
+              { value: 50, name: '首充' },
+              { value: 20, name: '存量' },
+            ],
+          },
+        ],
       };
       funnelchart.setOption(funneloption);
-      funnelchart.on('click', function (param){
+      funnelchart.on('click', function(param) {
         var selected = param.name;
         router.push({
-          pathname: '/orders/orderdetail',
-          query: {
-            a: 'b',
-          },
+          pathname: '/before/potentiallist',
         });
       });
     });
-
   }
 
   render() {
-
     return (
       <div>
-      <ChartCard id="funnelchart" style={{width:'100%',height: 600 }}></ChartCard>
+        <ChartCard id="funnelchart" style={{ width: '100%', height: 600 }} />
       </div>
     );
   }

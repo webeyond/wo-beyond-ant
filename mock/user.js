@@ -2,13 +2,13 @@
 export default {
   // 支持值为 Object 和 Array
   'GET /api/currentUser': {
-    name: 'Serati Ma',
-    avatar: 'https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png',
+    name: '林玄',
+    avatar: 'https://images.gitee.com/uploads/images/2018/1021/153407_889dc8dd_1326542.jpeg',
     userid: '00000001',
-    email: 'antdesign@alipay.com',
+    email: 'linx8@chinaunicom.com',
     signature: '海纳百川，有容乃大',
-    title: '交互专家',
-    group: '蚂蚁金服－某某某事业群－某某平台部－某某技术部－UED',
+    title: '产品经理',
+    group: '引擎计划-信息化班-第四组',
     tags: [
       {
         key: '0',
@@ -39,11 +39,11 @@ export default {
     country: 'China',
     geographic: {
       province: {
-        label: '浙江省',
+        label: '上海市',
         key: '330000',
       },
       city: {
-        label: '杭州市',
+        label: '长宁区',
         key: '330100',
       },
     },

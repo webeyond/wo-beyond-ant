@@ -1,4 +1,4 @@
-import React, {PureComponent} from 'react';
+import React, { PureComponent } from 'react';
 import { Table, Pagination } from 'antd';
 import $ from 'jquery';
 import 'whatwg-fetch';
@@ -10,103 +10,115 @@ class PotentialList extends PureComponent {
       itemList: [],
       loading: false,
       total: 0,
-      page:1,
-      param:props.location.query.a
-    }
+      page: 1,
+      param: props.location.query.a,
+    };
   }
   componentDidMount() {
-
-    // alert(this.state.param);
     this.setState({ loading: true });
     $.ajax({
-      type : "post",
-      url : "http://10.52.200.23/statistics/v1/selectOrderList?page=1&pageSize=10",
-      contentType : "application/json; charset=utf-8",
-      datatype : "json",
-      data :JSON.stringify({})
-    }).then((data) => {
+      type: 'post',
+      url: 'http://10.52.200.23/statistics/v1/selectOrderList?page=1&pageSize=10',
+      contentType: 'application/json; charset=utf-8',
+      datatype: 'json',
+      data: JSON.stringify({ payFlag: 0 }),
+    }).then(data => {
       this.setState({
         loading: false,
         itemList: data.rows,
-        total: data.total
+        total: data.total,
       });
     });
-
-
   }
 
   //分页点击事件
   getPages = (page, pageSize) => {
     this.setState({
       loading: true,
-      page: page
+      page: page,
     });
     $.ajax({
-      url:"http://10.52.200.23/statistics/v1/selectOrderList?page=" + page + "&pageSize=" + pageSize,
-      type: "POST",
-      contentType : "application/json; charset=utf-8",
-      datatype : "json",
-      data :JSON.stringify({})
-    }).then((data) => {
+      url:
+        'http://10.52.200.23/statistics/v1/selectOrderList?page=' + page + '&pageSize=' + pageSize,
+      type: 'POST',
+      contentType: 'application/json; charset=utf-8',
+      datatype: 'json',
+      data: JSON.stringify({ payFlag: 0 }),
+    }).then(data => {
       this.setState({
         itemList: data.rows,
         total: data.total,
-        loading:false
+        loading: false,
       });
-    })
-  }
+    });
+  };
 
   render() {
     const dataSource = this.state.itemList;
 
-    const columns = [{
-      title: '专员姓名',
-      dataIndex: 'operatorname',
-      key: 'operatorname',
-    }, {
-      title: '客户姓名',
-      dataIndex: 'customername',
-      key: 'customername',
-    }, {
-      title: '号码',
-      dataIndex: 'serialNumber',
-      key: 'serialNumber',
-    }, {
-      title: '套餐',
-      dataIndex: 'prodName',
-      key: 'prodName',
-    },{
-      title: '订单时间',
-      dataIndex: 'busiOrderDate',
-      key: 'busiOrderDate',
-    },{
-      title: '省',
-      dataIndex: 'province',
-      key: 'province',
-    },{
-      title: '市',
-      dataIndex: 'city',
-      key: 'city',
-    },{
-      title: '区',
-      dataIndex: 'district',
-      key: 'district',
-    },{
-      title: '订单状态',
-      dataIndex: 'payFlagName',
-      key: 'payFlagName',
-    } ];
+    const columns = [
+      {
+        title: '专员姓名',
+        dataIndex: 'operatorname',
+        key: 'operatorname',
+      },
+      {
+        title: '客户姓名',
+        dataIndex: 'customername',
+        key: 'customername',
+      },
+      {
+        title: '已选号码',
+        dataIndex: 'serialNumber',
+        key: 'serialNumber',
+      },
+      {
+        title: '套餐',
+        dataIndex: 'prodName',
+        key: 'prodName',
+      },
+      {
+        title: '订单时间',
+        dataIndex: 'busiOrderDate',
+        key: 'busiOrderDate',
+      },
+      {
+        title: '省',
+        dataIndex: 'province',
+        key: 'province',
+      },
+      {
+        title: '市',
+        dataIndex: 'city',
+        key: 'city',
+      },
+      {
+        title: '区',
+        dataIndex: 'district',
+        key: 'district',
+      },
+      {
+        title: '订单状态',
+        dataIndex: 'payFlagName',
+        key: 'payFlagName',
+      },
+    ];
     return (
-      <div style={{backgroundColor:"white"}}>
+      <div style={{ backgroundColor: 'white' }}>
         <Table
           dataSource={dataSource}
           columns={columns}
-          rowKey='busiCellno'
+          rowKey="busiCellno"
           pagination={false}
           bordered={false}
           loading={this.state.loading}
         />
-        <Pagination defaultCurrent={1} total={this.state.total} onChange={this.getPages} style={{marginTop:"20px",float:"right"}}/>
+        <Pagination
+          defaultCurrent={1}
+          total={this.state.total}
+          onChange={this.getPages}
+          style={{ marginTop: '20px', float: 'right' }}
+        />
       </div>
     );
   }

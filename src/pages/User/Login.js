@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import { formatMessage, FormattedMessage } from 'umi/locale';
-import Link from 'umi/link';
-import { Checkbox, Alert, Icon } from 'antd';
+import { Alert, Checkbox } from 'antd';
 import Login from '@/components/Login';
 import styles from './Login.less';
 
@@ -92,7 +91,9 @@ class LoginPage extends Component {
             {login.status === 'error' &&
               login.type === 'mobile' &&
               !submitting &&
-              this.renderMessage(formatMessage({ id: 'app.login.message-invalid-verification-code' }))}
+              this.renderMessage(
+                formatMessage({ id: 'app.login.message-invalid-verification-code' })
+              )}
             <Mobile name="mobile" />
             <Captcha name="captcha" countDown={120} onGetCaptcha={this.onGetCaptcha} />
           </Tab>
