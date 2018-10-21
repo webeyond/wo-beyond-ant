@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import { connect } from 'dva';
-import { formatMessage, FormattedMessage } from 'umi/locale';
 import {
   Row,
   Col,
@@ -24,666 +22,655 @@ import {
   Pie,
   TimelineChart,
 } from '@/components/Charts';
-import Trend from '@/components/Trend';
-import NumberInfo from '@/components/NumberInfo';
-import numeral from 'numeral';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
-import Yuan from '@/utils/Yuan';
-import { getTimeDistance } from '@/utils/utils';
+import { formatMessage, FormattedMessage } from 'umi/locale';
+
+// 引入 ECharts 主模块
+import echarts from 'echarts/lib/echarts';
+// 引入柱状图
+import 'echarts/lib/chart/bar';
+import 'echarts/map/js/province/shanghai';
+// 引入提示框和标题组件
+import 'echarts/lib/component/tooltip';
+import 'echarts/lib/component/title';
+// 使用样式
+import 'echarts/theme/macarons'
 
 import styles from './Analysis.less';
+import $ from "jquery";
+import {connect} from "dva";
 
-const { TabPane } = Tabs;
-const { RangePicker } = DatePicker;
 
-const rankingListData = [];
-for (let i = 0; i < 7; i += 1) {
-  rankingListData.push({
-    title: `工专路 ${i} 号店`,
-    total: 323234,
-  });
-}
 
-@connect(({ chart, loading }) => ({
-  chart,
-  loading: loading.effects['chart/fetch'],
-}))
 class Analysis extends Component {
   constructor(props) {
     super(props);
-    this.rankingListData = [];
-    for (let i = 0; i < 7; i += 1) {
-      this.rankingListData.push({
-        title: formatMessage({ id: 'app.analysis.test' }, { no: i }),
-        total: 323234,
-      });
+    this.state = {
+      orderscount: [],
+
     }
   }
 
-  state = {
-    salesType: 'all',
-    currentTabKey: '',
-    rangePickerValue: getTimeDistance('year'),
-    loading: true,
-  };
+
+
 
   componentDidMount() {
-    const { dispatch } = this.props;
-    this.reqRef = requestAnimationFrame(() => {
-      dispatch({
-        type: 'chart/fetch',
+
+    var orderscountchart = echarts.init(document.getElementById('ordercountchart'), "macarons");
+    $.ajax({
+      type : "post",
+      url : "http://10.52.200.23/statistics/v1/selectSignCustomerCount",
+      contentType : "application/json; charset=utf-8",
+      datatype : "json",
+      data :JSON.stringify({})
+    }).then((data) => {
+      $.get('http://localhost:8000/shanghai.json', function (shhJson) {
+        orderscountchart.hideLoading();
+        echarts.registerMap('shanghai', shhJson);
+        var orderscountoption = {
+          title: {
+            text: '分区销售量',
+            subtext: '上海市各区销售量',
+            left: 'right'
+          },
+          tooltip: {
+            trigger: 'item',
+            showDelay: 0,
+            transitionDuration: 0.2,
+            formatter: function (params) {
+              var value = (params.value + '').split('.');
+              value = value[0].replace(/(\d{1,3})(?=(?:\d{3})+(?!\d))/g, '$1,');
+              return params.seriesName + '<br/>' + params.name + ': ' + value;
+            }
+          },
+          visualMap: {
+            left: 'right',
+            min: 0,
+            max: 300,
+            inRange: {
+              color: ['#ffecec','#ffd2d2','#ffb5b5','#ff9797','#ff7575', '#ff5151', '#ff2d2d', '#ff0000', '#ea0000','#ce0000','#ae0000']
+            },
+            text:['高','低'],           // 文本，默认为数值文本
+            calculable: true
+          },
+          toolbox: {
+            show: true,
+            //orient: 'vertical',
+            left: 'left',
+            top: 'top',
+            feature: {
+              dataView: {readOnly: false},
+              restore: {},
+              saveAsImage: {}
+            }
+          },
+          series: [
+            {
+              name: '销售量',
+              type: 'map',
+              roam: true,
+              map: 'shanghai',
+              itemStyle:{
+                emphasis:{label:{show:true}}
+              },
+
+              data:data.list,
+              //自定义名称映射
+                  nameMap: {
+                    '黄浦区': '南区',
+                    '徐汇区': '南区',
+                    '长宁区': '西区',
+                    '静安区': '北区',
+                    '普陀区': '西区',
+                    '虹口区': '北区',
+                    '杨浦区': '北区',
+                    '闸北区': '北区',
+                    '浦东新区': '东区',
+                    '闵行区': '闵行',
+                    '宝山区': '宝山',
+                    '嘉定区': '嘉定',
+                    '金山区': '金山',
+                    '松江区': '松江',
+                    '青浦区': '青浦',
+                    '奉贤区': '奉贤',
+                    '崇明区': '崇明',
+                    '南汇区': '东区'
+                  }
+            }
+          ]
+        };
+        orderscountchart.setOption(orderscountoption);
       });
-      this.timeoutId = setTimeout(() => {
-        this.setState({
-          loading: false,
-        });
-      }, 600);
-    });
-  }
-
-  componentWillUnmount() {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'chart/clear',
-    });
-    cancelAnimationFrame(this.reqRef);
-    clearTimeout(this.timeoutId);
-  }
-
-  handleChangeSalesType = e => {
-    this.setState({
-      salesType: e.target.value,
-    });
-  };
-
-  handleTabChange = key => {
-    this.setState({
-      currentTabKey: key,
-    });
-  };
-
-  handleRangePickerChange = rangePickerValue => {
-    const { dispatch } = this.props;
-    this.setState({
-      rangePickerValue,
     });
 
-    dispatch({
-      type: 'chart/fetchSalesData',
-    });
-  };
+    var topfive = echarts.init(document.getElementById('topfive'), "macarons");
+    $.ajax({
+      type : "post",
+      url : "http://10.52.200.23/statistics/v1/selectAccountTopFive",
+      contentType : "application/json; charset=utf-8",
+      datatype : "json",
+      data :JSON.stringify({})
+    }).then((data) => {
 
-  selectDate = type => {
-    const { dispatch } = this.props;
-    this.setState({
-      rangePickerValue: getTimeDistance(type),
+      var names=[];
+      var sales=[];
+      var photos=[];
+      data.list.forEach(function(item,index){
+          names.push(item.operatorname);
+          sales.push(item.counts);
+          photos.push(item.pic);
+      });
+
+      var topfiveoption = {
+        title: {
+          text: '销售TOP5',
+          subtext: '上海市地推专员销售量TOP5',
+          left: 'right'
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'none'
+          },
+          formatter: function (params) {
+            return params[0].name + ': ' + params[0].value;
+          }
+        },
+        xAxis: {
+          data: names,
+          axisTick: {show: false},
+          axisLine: {show: false},
+          axisLabel: {
+            textStyle: {
+              color: '#e54035'
+            }
+          }
+        },
+        yAxis: {
+          splitLine: {show: false},
+          axisTick: {show: false},
+          axisLine: {show: false},
+          axisLabel: {show: false}
+        },
+        color: ['#e54035'],
+        series: [{
+          name: 'hill',
+          type: 'pictorialBar',
+          barCategoryGap: '-100%',
+          // symbol: 'path://M0,10 L10,10 L5,0 L0,10 z',
+          symbol: 'path://M0,10 L10,10 C5.5,10 5.5,5 5,0 C4.5,5 4.5,10 0,10 z',
+          itemStyle: {
+            normal: {
+              opacity: 0.5
+            },
+            emphasis: {
+              opacity: 1
+            }
+          },
+          data: sales,
+          z: 5
+        }, {
+          name: 'glyph',
+          type: 'pictorialBar',
+          barGap: '-100%',
+          symbolPosition: 'end',
+          symbolSize: 50,
+          symbolOffset: [0, '-100%'],
+          data: [{
+            value: sales[0],
+            symbol: photos[0],
+            symbolSize: [40, 58]
+          }, {
+            value: sales[1],
+            symbol: photos[1],
+            symbolSize: [40, 58]
+          }, {
+            value: sales[2],
+            symbol: photos[2],
+            symbolSize:[40, 58]
+          }, {
+            value: sales[3],
+            symbol: photos[3],
+            symbolSize: [40, 58]
+          }, {
+            value: sales[4],
+            symbol: photos[4],
+            symbolSize: [40, 58]
+          }]
+        }]
+      };
+      topfive.setOption(topfiveoption);
     });
 
-    dispatch({
-      type: 'chart/fetchSalesData',
-    });
-  };
+    var areatime = echarts.init(document.getElementById('areatime'), "macarons");
+    $.ajax({
+      type : "post",
+      url : "http://10.52.200.23/statistics/v1/selectDistrictSignCount",
+      contentType : "application/json; charset=utf-8",
+      datatype : "json",
+      data :JSON.stringify({})
+    }).then((data) => {
 
-  isActive(type) {
-    const { rangePickerValue } = this.state;
-    const value = getTimeDistance(type);
-    if (!rangePickerValue[0] || !rangePickerValue[1]) {
-      return '';
-    }
-    if (
-      rangePickerValue[0].isSame(value[0], 'day') &&
-      rangePickerValue[1].isSame(value[1], 'day')
-    ) {
-      return styles.currentDate;
-    }
-    return '';
+      var names=[];
+      var values=[];
+
+      data.list.forEach(function(item,index){
+          names.push(item.name);
+          values.push(item.value);
+      });
+
+      var areatimeoption = {
+        title: {
+          text: '各区签约数量',
+          subtext: '上海市各区成功签约数量'
+        },
+        tooltip: {
+          trigger: 'axis'
+        },
+        legend:[
+          {
+            data:names.slice(0,5)
+          },
+          {
+            top: '20',
+            data:names.slice(5,10)
+          },
+        ],
+        toolbox: {
+          show: true,
+          feature: {
+            dataZoom: {
+              yAxisIndex: 'none'
+            },
+            dataView: {readOnly: false},
+            magicType: {type: ['line', 'bar']},
+            restore: {},
+            saveAsImage: {}
+          }
+        },
+        xAxis:  {
+          type: 'category',
+          boundaryGap: false,
+          data: ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月']
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: {
+            formatter: '{value} 张'
+          }
+        },
+        series: [
+          {
+            name:names[0],
+            type:'line',
+            data:values[0],
+            markPoint: {
+              data: [
+                {type: 'max', name: '最大值'},
+                {type: 'min', name: '最小值'}
+              ]
+            },
+            markLine: {
+              data: [
+                {type: 'average', name: '平均值'}
+              ]
+            }
+          },{
+            name:names[1],
+            type:'line',
+            data:values[1],
+            markPoint: {
+              data: [
+                {type: 'max', name: '最大值'},
+                {type: 'min', name: '最小值'}
+              ]
+            },
+            markLine: {
+              data: [
+                {type: 'average', name: '平均值'}
+              ]
+            }
+          },{
+            name:names[2],
+            type:'line',
+            data:values[2],
+            markPoint: {
+              data: [
+                {type: 'max', name: '最大值'},
+                {type: 'min', name: '最小值'}
+              ]
+            },
+            markLine: {
+              data: [
+                {type: 'average', name: '平均值'}
+              ]
+            }
+          },{
+            name:names[3],
+            type:'line',
+            data:values[3],
+            markPoint: {
+              data: [
+                {type: 'max', name: '最大值'},
+                {type: 'min', name: '最小值'}
+              ]
+            },
+            markLine: {
+              data: [
+                {type: 'average', name: '平均值'}
+              ]
+            }
+          },{
+            name:names[4],
+            type:'line',
+            data:values[4],
+            markPoint: {
+              data: [
+                {type: 'max', name: '最大值'},
+                {type: 'min', name: '最小值'}
+              ]
+            },
+            markLine: {
+              data: [
+                {type: 'average', name: '平均值'}
+              ]
+            }
+          },{
+            name:names[5],
+            type:'line',
+            data:values[5],
+            markPoint: {
+              data: [
+                {type: 'max', name: '最大值'},
+                {type: 'min', name: '最小值'}
+              ]
+            },
+            markLine: {
+              data: [
+                {type: 'average', name: '平均值'}
+              ]
+            }
+          },{
+            name:names[6],
+            type:'line',
+            data:values[6],
+            markPoint: {
+              data: [
+                {type: 'max', name: '最大值'},
+                {type: 'min', name: '最小值'}
+              ]
+            },
+            markLine: {
+              data: [
+                {type: 'average', name: '平均值'}
+              ]
+            }
+          },{
+            name:names[7],
+            type:'line',
+            data:values[7],
+            markPoint: {
+              data: [
+                {type: 'max', name: '最大值'},
+                {type: 'min', name: '最小值'}
+              ]
+            },
+            markLine: {
+              data: [
+                {type: 'average', name: '平均值'}
+              ]
+            }
+          },{
+            name:names[8],
+            type:'line',
+            data:values[8],
+            markPoint: {
+              data: [
+                {type: 'max', name: '最大值'},
+                {type: 'min', name: '最小值'}
+              ]
+            },
+            markLine: {
+              data: [
+                {type: 'average', name: '平均值'}
+              ]
+            }
+          },{
+            name:names[9],
+            type:'line',
+            data:values[9],
+            markPoint: {
+              data: [
+                {type: 'max', name: '最大值'},
+                {type: 'min', name: '最小值'}
+              ]
+            },
+            markLine: {
+              data: [
+                {type: 'average', name: '平均值'}
+              ]
+            }
+          },
+
+        ]
+      };
+      areatime.setOption(areatimeoption);
+    });
+
+    var topcard = echarts.init(document.getElementById('topcard'), "macarons");
+    $.ajax({
+      type : "post",
+      url : "http://10.52.200.23/statistics/v1/selectProdTopFive",
+      contentType : "application/json; charset=utf-8",
+      datatype : "json",
+      data :JSON.stringify({})
+    }).then((data) => {
+
+      var topcardoption = {
+        backgroundColor: '#ffffff',
+
+        title: {
+          text: '最热套餐TOP5',
+          left: 'right',
+          top: 10,
+          textStyle: {
+            color: '#008acd'
+          },
+        },
+
+        tooltip : {
+          trigger: 'item',
+          formatter: "{a} <br/>{b} : {c} ({d}%)"
+        },
+
+        toolbox: {
+          show: true,
+          //orient: 'vertical',
+          left: 'left',
+          top: 'top',
+          feature: {
+            dataView: {readOnly: false},
+            restore: {},
+            saveAsImage: {}
+          }
+        },
+
+        visualMap: {
+          show: false,
+          min: 100,
+          max: 700,
+          inRange: {
+            colorLightness: [0.2, 1]
+          }
+        },
+        series : [
+          {
+            name:'套餐名',
+            type:'pie',
+            radius : '55%',
+            center: ['50%', '50%'],
+            data:data.list.sort(function (a, b) { return a.value - b.value; }),
+            roseType: 'radius',
+            label: {
+              normal: {
+                textStyle: {
+                  color: 'rgba(0, 0, 0, 0.5)'
+                }
+              }
+            },
+            labelLine: {
+              normal: {
+                lineStyle: {
+                  color: 'rgba(0, 0, 0, 0.5)'
+                },
+                smooth: 0.2,
+                length: 10,
+                length2: 20
+              }
+            },
+            itemStyle: {
+              normal: {
+                color: '#ffecec',
+                shadowBlur: 50,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            },
+
+            animationType: 'scale',
+            animationEasing: 'elasticOut',
+            animationDelay: function (idx) {
+              return Math.random() * 200;
+            }
+          }
+        ]
+      };
+      topcard.setOption(topcardoption);
+    });
+
+    var topnum = echarts.init(document.getElementById('topnum'), "macarons");
+    $.ajax({
+      type : "post",
+      url : "http://10.52.200.23/statistics/v1/selectSerialHeatAnalysis",
+      contentType : "application/json; charset=utf-8",
+      datatype : "json",
+      data :JSON.stringify({})
+    }).then((data) => {
+
+      var name=[];
+      var districtArray=[];
+      var countsArray=[];
+      data.list.forEach(function(item,index){
+        name.push(item.name);
+        districtArray.push(item.districtArray);
+        countsArray.push(item.countsArray);
+      });
+
+      var topnumoption = {
+        backgroundColor: '#ffffff',
+
+        title: {
+          text: '靓号热度分析',
+          left: 'right',
+          top: 10,
+          textStyle: {
+            color: '#008acd'
+          }
+        },
+        angleAxis: {
+          top:20,
+          type: 'category',
+          data: districtArray[0],
+          z: 10,
+          color:'#6c6c6c'
+        },
+        radiusAxis: {
+        },
+        polar: {
+        },
+        series: [{
+          type: 'bar',
+          data: countsArray[0],
+          coordinateSystem: 'polar',
+          name: name[0],
+          stack: 'a',
+          color:'#ce0000'
+        }, {
+          type: 'bar',
+          data: countsArray[1],
+          coordinateSystem: 'polar',
+          name: name[1],
+          stack: 'a',
+          color:'#ff0000'
+        }, {
+          type: 'bar',
+          data: countsArray[2],
+          coordinateSystem: 'polar',
+          name: name[2],
+          stack: 'a',
+          color:"#ff7575"
+        }, {
+          type: 'bar',
+          data: countsArray[3],
+          coordinateSystem: 'polar',
+          name: name[3],
+          stack: 'a',
+          color:"#ffd2d2"
+        }],
+        tooltip: {
+          trigger: 'item',
+          formatter: "{b} <br/>{a} : {c}张"
+        },
+        toolbox: {
+          show: true,
+          //orient: 'vertical',
+          left: 'left',
+          top: 'top',
+          feature: {
+            dataView: {readOnly: false},
+            restore: {},
+            saveAsImage: {}
+          }
+        },
+        legend:
+          [
+            {
+              top:20,
+              left:10,
+              show: true,
+              data:['A', 'B']
+            },
+            {
+              top:40,
+              left:10,
+              show: true,
+              data:['C','D']
+            },
+          ]
+      };
+      topnum.setOption(topnumoption);
+    });
+
   }
 
   render() {
-    const { rangePickerValue, salesType, loading: propsLoding, currentTabKey } = this.state;
-    const { chart, loading: stateLoading } = this.props;
-    const {
-      visitData,
-      visitData2,
-      salesData,
-      searchData,
-      offlineData,
-      offlineChartData,
-      salesTypeData,
-      salesTypeDataOnline,
-      salesTypeDataOffline,
-    } = chart;
-    const loading = propsLoding || stateLoading;
-    let salesPieData;
-    if (salesType === 'all') {
-      salesPieData = salesTypeData;
-    } else {
-      salesPieData = salesType === 'online' ? salesTypeDataOnline : salesTypeDataOffline;
-    }
-    const menu = (
-      <Menu>
-        <Menu.Item>操作一</Menu.Item>
-        <Menu.Item>操作二</Menu.Item>
-      </Menu>
-    );
-
-    const iconGroup = (
-      <span className={styles.iconGroup}>
-        <Dropdown overlay={menu} placement="bottomRight">
-          <Icon type="ellipsis" />
-        </Dropdown>
-      </span>
-    );
-
-    const salesExtra = (
-      <div className={styles.salesExtraWrap}>
-        <div className={styles.salesExtra}>
-          <a className={this.isActive('today')} onClick={() => this.selectDate('today')}>
-            <FormattedMessage id="app.analysis.all-day" defaultMessage="All Day" />
-          </a>
-          <a className={this.isActive('week')} onClick={() => this.selectDate('week')}>
-            <FormattedMessage id="app.analysis.all-week" defaultMessage="All Week" />
-          </a>
-          <a className={this.isActive('month')} onClick={() => this.selectDate('month')}>
-            <FormattedMessage id="app.analysis.all-month" defaultMessage="All Month" />
-          </a>
-          <a className={this.isActive('year')} onClick={() => this.selectDate('year')}>
-            <FormattedMessage id="app.analysis.all-year" defaultMessage="All Year" />
-          </a>
-        </div>
-        <RangePicker
-          value={rangePickerValue}
-          onChange={this.handleRangePickerChange}
-          style={{ width: 256 }}
-        />
-      </div>
-    );
-
-    const columns = [
-      {
-        title: <FormattedMessage id="app.analysis.table.rank" defaultMessage="Rank" />,
-        dataIndex: 'index',
-        key: 'index',
-      },
-      {
-        title: (
-          <FormattedMessage
-            id="app.analysis.table.search-keyword"
-            defaultMessage="Search keyword"
-          />
-        ),
-        dataIndex: 'keyword',
-        key: 'keyword',
-        render: text => <a href="/">{text}</a>,
-      },
-      {
-        title: <FormattedMessage id="app.analysis.table.users" defaultMessage="Users" />,
-        dataIndex: 'count',
-        key: 'count',
-        sorter: (a, b) => a.count - b.count,
-        className: styles.alignRight,
-      },
-      {
-        title: (
-          <FormattedMessage id="app.analysis.table.weekly-range" defaultMessage="Weekly Range" />
-        ),
-        dataIndex: 'range',
-        key: 'range',
-        sorter: (a, b) => a.range - b.range,
-        render: (text, record) => (
-          <Trend flag={record.status === 1 ? 'down' : 'up'}>
-            <span style={{ marginRight: 4 }}>{text}%</span>
-          </Trend>
-        ),
-        align: 'right',
-      },
-    ];
-
-    const activeKey = currentTabKey || (offlineData[0] && offlineData[0].name);
-
-    const CustomTab = ({ data, currentTabKey: currentKey }) => (
-      <Row gutter={8} style={{ width: 138, margin: '8px 0' }}>
-        <Col span={12}>
-          <NumberInfo
-            title={data.name}
-            subTitle={
-              <FormattedMessage
-                id="app.analysis.conversion-rate"
-                defaultMessage="Conversion Rate"
-              />
-            }
-            gap={2}
-            total={`${data.cvr * 100}%`}
-            theme={currentKey !== data.name && 'light'}
-          />
-        </Col>
-        <Col span={12} style={{ paddingTop: 36 }}>
-          <Pie
-            animate={false}
-            color={currentKey !== data.name && '#BDE4FF'}
-            inner={0.55}
-            tooltip={false}
-            margin={[0, 0, 0, 0]}
-            percent={data.cvr * 100}
-            height={64}
-          />
-        </Col>
-      </Row>
-    );
-
-    const topColResponsiveProps = {
-      xs: 24,
-      sm: 12,
-      md: 12,
-      lg: 12,
-      xl: 6,
-      style: { marginBottom: 24 },
-    };
 
     return (
-      <GridContent>
-        <Row gutter={24}>
-          <Col {...topColResponsiveProps}>
-            <ChartCard
-              bordered={false}
-              title={
-                <FormattedMessage id="app.analysis.total-sales" defaultMessage="Total Sales" />
-              }
-              action={
-                <Tooltip
-                  title={
-                    <FormattedMessage id="app.analysis.introduce" defaultMessage="introduce" />
-                  }
-                >
-                  <Icon type="info-circle-o" />
-                </Tooltip>
-              }
-              loading={loading}
-              total={() => <Yuan>126560</Yuan>}
-              footer={
-                <Field
-                  label={
-                    <FormattedMessage id="app.analysis.day-sales" defaultMessage="Day Sales" />
-                  }
-                  value={`￥${numeral(12423).format('0,0')}`}
-                />
-              }
-              contentHeight={46}
-            >
-              <Trend flag="up" style={{ marginRight: 16 }}>
-                <FormattedMessage id="app.analysis.week" defaultMessage="Weekly Changes" />
-                <span className={styles.trendText}>12%</span>
-              </Trend>
-              <Trend flag="down">
-                <FormattedMessage id="app.analysis.day" defaultMessage="Daily Changes" />
-                <span className={styles.trendText}>11%</span>
-              </Trend>
-            </ChartCard>
-          </Col>
-          <Col {...topColResponsiveProps}>
-            <ChartCard
-              bordered={false}
-              loading={loading}
-              title={<FormattedMessage id="app.analysis.visits" defaultMessage="visits" />}
-              action={
-                <Tooltip
-                  title={
-                    <FormattedMessage id="app.analysis.introduce" defaultMessage="introduce" />
-                  }
-                >
-                  <Icon type="info-circle-o" />
-                </Tooltip>
-              }
-              total={numeral(8846).format('0,0')}
-              footer={
-                <Field
-                  label={
-                    <FormattedMessage id="app.analysis.day-visits" defaultMessage="Day Visits" />
-                  }
-                  value={numeral(1234).format('0,0')}
-                />
-              }
-              contentHeight={46}
-            >
-              <MiniArea color="#975FE4" data={visitData} />
-            </ChartCard>
-          </Col>
-          <Col {...topColResponsiveProps}>
-            <ChartCard
-              bordered={false}
-              loading={loading}
-              title={<FormattedMessage id="app.analysis.payments" defaultMessage="Payments" />}
-              action={
-                <Tooltip
-                  title={
-                    <FormattedMessage id="app.analysis.introduce" defaultMessage="Introduce" />
-                  }
-                >
-                  <Icon type="info-circle-o" />
-                </Tooltip>
-              }
-              total={numeral(6560).format('0,0')}
-              footer={
-                <Field
-                  label={
-                    <FormattedMessage
-                      id="app.analysis.conversion-rate"
-                      defaultMessage="Conversion Rate"
-                    />
-                  }
-                  value="60%"
-                />
-              }
-              contentHeight={46}
-            >
-              <MiniBar data={visitData} />
-            </ChartCard>
-          </Col>
-          <Col {...topColResponsiveProps}>
-            <ChartCard
-              loading={loading}
-              bordered={false}
-              title={
-                <FormattedMessage
-                  id="app.analysis.operational-effect"
-                  defaultMessage="Operational Effect"
-                />
-              }
-              action={
-                <Tooltip
-                  title={
-                    <FormattedMessage id="app.analysis.introduce" defaultMessage="introduce" />
-                  }
-                >
-                  <Icon type="info-circle-o" />
-                </Tooltip>
-              }
-              total="78%"
-              footer={
-                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
-                  <Trend flag="up" style={{ marginRight: 16 }}>
-                    <FormattedMessage id="app.analysis.week" defaultMessage="Weekly changes" />
-                    <span className={styles.trendText}>12%</span>
-                  </Trend>
-                  <Trend flag="down">
-                    <FormattedMessage id="app.analysis.day" defaultMessage="Weekly changes" />
-                    <span className={styles.trendText}>11%</span>
-                  </Trend>
-                </div>
-              }
-              contentHeight={46}
-            >
-              <MiniProgress percent={78} strokeWidth={8} target={80} color="#13C2C2" />
-            </ChartCard>
-          </Col>
+      <div>
+        <Row>
+          <Col span={24}><ChartCard id="areatime" style={{width:'97.5%',height:400 }}></ChartCard></Col>
+          </Row>
+        <Row>
+          <Col span={12}><ChartCard id="ordercountchart" style={{width:'95%',height:400,marginTop:20 }}></ChartCard></Col>
+          <Col span={12}><ChartCard id="topfive" style={{width:'95%',height:400,marginTop:20 }}></ChartCard></Col>
         </Row>
-
-        <Card loading={loading} bordered={false} bodyStyle={{ padding: 0 }}>
-          <div className={styles.salesCard}>
-            <Tabs tabBarExtraContent={salesExtra} size="large" tabBarStyle={{ marginBottom: 24 }}>
-              <TabPane
-                tab={<FormattedMessage id="app.analysis.sales" defaultMessage="Sales" />}
-                key="sales"
-              >
-                <Row>
-                  <Col xl={16} lg={12} md={12} sm={24} xs={24}>
-                    <div className={styles.salesBar}>
-                      <Bar
-                        height={295}
-                        title={
-                          <FormattedMessage
-                            id="app.analysis.sales-trend"
-                            defaultMessage="Sales Trend"
-                          />
-                        }
-                        data={salesData}
-                      />
-                    </div>
-                  </Col>
-                  <Col xl={8} lg={12} md={12} sm={24} xs={24}>
-                    <div className={styles.salesRank}>
-                      <h4 className={styles.rankingTitle}>
-                        <FormattedMessage
-                          id="app.analysis.sales-ranking"
-                          defaultMessage="Sales Ranking"
-                        />
-                      </h4>
-                      <ul className={styles.rankingList}>
-                        {this.rankingListData.map((item, i) => (
-                          <li key={item.title}>
-                            <span
-                              className={`${styles.rankingItemNumber} ${
-                                i < 3 ? styles.active : ''
-                              }`}
-                            >
-                              {i + 1}
-                            </span>
-                            <span className={styles.rankingItemTitle} title={item.title}>
-                              {item.title}
-                            </span>
-                            <span className={styles.rankingItemValue}>
-                              {numeral(item.total).format('0,0')}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </Col>
-                </Row>
-              </TabPane>
-              <TabPane
-                tab={<FormattedMessage id="app.analysis.visits" defaultMessage="Visits" />}
-                key="views"
-              >
-                <Row>
-                  <Col xl={16} lg={12} md={12} sm={24} xs={24}>
-                    <div className={styles.salesBar}>
-                      <Bar
-                        height={292}
-                        title={
-                          <FormattedMessage
-                            id="app.analysis.visits-trend"
-                            defaultMessage="Visits Trend"
-                          />
-                        }
-                        data={salesData}
-                      />
-                    </div>
-                  </Col>
-                  <Col xl={8} lg={12} md={12} sm={24} xs={24}>
-                    <div className={styles.salesRank}>
-                      <h4 className={styles.rankingTitle}>
-                        <FormattedMessage
-                          id="app.analysis.visits-ranking"
-                          defaultMessage="Visits Ranking"
-                        />
-                      </h4>
-                      <ul className={styles.rankingList}>
-                        {this.rankingListData.map((item, i) => (
-                          <li key={item.title}>
-                            <span
-                              className={`${styles.rankingItemNumber} ${
-                                i < 3 ? styles.active : ''
-                              }`}
-                            >
-                              {i + 1}
-                            </span>
-                            <span className={styles.rankingItemTitle} title={item.title}>
-                              {item.title}
-                            </span>
-                            <span>{numeral(item.total).format('0,0')}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </Col>
-                </Row>
-              </TabPane>
-            </Tabs>
-          </div>
-        </Card>
-
-        <Row gutter={24}>
-          <Col xl={12} lg={24} md={24} sm={24} xs={24}>
-            <Card
-              loading={loading}
-              bordered={false}
-              title={
-                <FormattedMessage
-                  id="app.analysis.online-top-search"
-                  defaultMessage="Online Top Search"
-                />
-              }
-              extra={iconGroup}
-              style={{ marginTop: 24 }}
-            >
-              <Row gutter={68}>
-                <Col sm={12} xs={24} style={{ marginBottom: 24 }}>
-                  <NumberInfo
-                    subTitle={
-                      <span>
-                        <FormattedMessage
-                          id="app.analysis.search-users"
-                          defaultMessage="search users"
-                        />
-                        <Tooltip
-                          title={
-                            <FormattedMessage
-                              id="app.analysis.introduce"
-                              defaultMessage="introduce"
-                            />
-                          }
-                        >
-                          <Icon style={{ marginLeft: 8 }} type="info-circle-o" />
-                        </Tooltip>
-                      </span>
-                    }
-                    gap={8}
-                    total={numeral(12321).format('0,0')}
-                    status="up"
-                    subTotal={17.1}
-                  />
-                  <MiniArea line height={45} data={visitData2} />
-                </Col>
-                <Col sm={12} xs={24} style={{ marginBottom: 24 }}>
-                  <NumberInfo
-                    subTitle={
-                      <span>
-                        <FormattedMessage
-                          id="app.analysis.per-capita-search"
-                          defaultMessage="Per Capita Search"
-                        />
-                        <Tooltip
-                          title={
-                            <FormattedMessage
-                              id="app.analysis.introduce"
-                              defaultMessage="introduce"
-                            />
-                          }
-                        >
-                          <Icon style={{ marginLeft: 8 }} type="info-circle-o" />
-                        </Tooltip>
-                      </span>
-                    }
-                    total={2.7}
-                    status="down"
-                    subTotal={26.2}
-                    gap={8}
-                  />
-                  <MiniArea line height={45} data={visitData2} />
-                </Col>
-              </Row>
-              <Table
-                rowKey={record => record.index}
-                size="small"
-                columns={columns}
-                dataSource={searchData}
-                pagination={{
-                  style: { marginBottom: 0 },
-                  pageSize: 5,
-                }}
-              />
-            </Card>
-          </Col>
-          <Col xl={12} lg={24} md={24} sm={24} xs={24}>
-            <Card
-              loading={loading}
-              className={styles.salesCard}
-              bordered={false}
-              title={
-                <FormattedMessage
-                  id="app.analysis.the-proportion-of-sales"
-                  defaultMessage="The Proportion of Sales"
-                />
-              }
-              bodyStyle={{ padding: 24 }}
-              extra={
-                <div className={styles.salesCardExtra}>
-                  {iconGroup}
-                  <div className={styles.salesTypeRadio}>
-                    <Radio.Group value={salesType} onChange={this.handleChangeSalesType}>
-                      <Radio.Button value="all">
-                        <FormattedMessage id="app.analysis.channel.all" defaultMessage="ALL" />
-                      </Radio.Button>
-                      <Radio.Button value="online">
-                        <FormattedMessage
-                          id="app.analysis.channel.online"
-                          defaultMessage="Online"
-                        />
-                      </Radio.Button>
-                      <Radio.Button value="stores">
-                        <FormattedMessage
-                          id="app.analysis.channel.stores"
-                          defaultMessage="Stores"
-                        />
-                      </Radio.Button>
-                    </Radio.Group>
-                  </div>
-                </div>
-              }
-              style={{ marginTop: 24, minHeight: 509 }}
-            >
-              <h4 style={{ marginTop: 8, marginBottom: 32 }}>
-                <FormattedMessage id="app.analysis.sales" defaultMessage="Sales" />
-              </h4>
-              <Pie
-                hasLegend
-                subTitle={<FormattedMessage id="app.analysis.sales" defaultMessage="Sales" />}
-                total={() => <Yuan>{salesPieData.reduce((pre, now) => now.y + pre, 0)}</Yuan>}
-                data={salesPieData}
-                valueFormat={value => <Yuan>{value}</Yuan>}
-                height={248}
-                lineWidth={4}
-              />
-            </Card>
-          </Col>
+        <Row>
+          <Col span={12}><ChartCard id="topnum" style={{width:'95%',height:400,marginTop:20 }}></ChartCard></Col>
+          <Col span={12}><ChartCard id="topcard" style={{width:'95%',height:400,marginTop:20 }}></ChartCard></Col>
         </Row>
+      </div>
 
-        <Card
-          loading={loading}
-          className={styles.offlineCard}
-          bordered={false}
-          bodyStyle={{ padding: '0 0 32px 0' }}
-          style={{ marginTop: 32 }}
-        >
-          <Tabs activeKey={activeKey} onChange={this.handleTabChange}>
-            {offlineData.map(shop => (
-              <TabPane tab={<CustomTab data={shop} currentTabKey={activeKey} />} key={shop.name}>
-                <div style={{ padding: '0 24px' }}>
-                  <TimelineChart
-                    height={400}
-                    data={offlineChartData}
-                    titleMap={{
-                      y1: formatMessage({ id: 'app.analysis.traffic' }),
-                      y2: formatMessage({ id: 'app.analysis.payments' }),
-                    }}
-                  />
-                </div>
-              </TabPane>
-            ))}
-          </Tabs>
-        </Card>
-      </GridContent>
+
+
     );
   }
 }
