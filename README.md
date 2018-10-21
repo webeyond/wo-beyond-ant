@@ -6,17 +6,18 @@
 沃超越项目，主要用于地推销售联通卡业务，本项目为前台部分      [此版本是未安装类库版]。。
 
 <h5 align="center">下面是部分项目运行图：</h5>
-<h6 align="center">大屏展示：</h6>
+
+大屏展示：
 ![](https://images.gitee.com/uploads/images/2018/1021/160619_0b25eddd_1326542.jpeg)
-<h6 align="center">热门分析：</h6>
+热门分析：
 ![](https://images.gitee.com/uploads/images/2018/1021/160723_5d45d0a1_1326542.jpeg)
-<h6 align="center">指标仪表盘：</h6>
+指标仪表盘：
 ![](https://images.gitee.com/uploads/images/2018/1021/160821_880cc7b0_1326542.jpeg)
-<h6 align="center">漏斗分析：</h6>
+漏斗分析：
 ![](https://images.gitee.com/uploads/images/2018/1021/160908_c861a425_1326542.jpeg)
-<h6 align="center">潜在客户地址：</h6>
+潜在客户地址：
 ![](https://images.gitee.com/uploads/images/2018/1021/160943_84d9ec89_1326542.jpeg)
-<h6 align="center">地推专员管理：</h6>
+地推专员管理：
 ![](https://images.gitee.com/uploads/images/2018/1021/161056_6521a4d5_1326542.jpeg)
 
 </div>
