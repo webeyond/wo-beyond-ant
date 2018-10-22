@@ -31,7 +31,7 @@ class Funnel extends Component {
     var funnelchart = echarts.init(document.getElementById('funnelchart'), 'macarons');
     $.ajax({
       type: 'post',
-      url: 'http://10.52.200.23/statistics/v1/selectSignFunnelCount',
+      url: 'http://localhost/statistics/v1/selectSignFunnelCount',
       contentType: 'application/json; charset=utf-8',
       datatype: 'json',
       data: JSON.stringify({}),

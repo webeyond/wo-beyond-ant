@@ -20,7 +20,7 @@ class OrderDetail extends PureComponent {
     this.setState({ loading: true });
     $.ajax({
       type: 'post',
-      url: 'http://10.52.200.23/statistics/v1/selectOrderList?page=1&pageSize=10',
+      url: 'http://localhost/statistics/v1/selectOrderList?page=1&pageSize=10',
       contentType: 'application/json; charset=utf-8',
       datatype: 'json',
       data: JSON.stringify({}),
@@ -40,8 +40,7 @@ class OrderDetail extends PureComponent {
       page: page,
     });
     $.ajax({
-      url:
-        'http://10.52.200.23/statistics/v1/selectOrderList?page=' + page + '&pageSize=' + pageSize,
+      url: 'http://localhost/statistics/v1/selectOrderList?page=' + page + '&pageSize=' + pageSize,
       type: 'POST',
       contentType: 'application/json; charset=utf-8',
       datatype: 'json',
