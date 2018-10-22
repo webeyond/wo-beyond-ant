@@ -62,6 +62,8 @@ git clone --depth=1 https://github.com/webeyond/wo-beyond-ant-clean.git my-proje
 $ git reset  --hard commit_id  
 $ git reset  --hard 0dc1ec4c37d13bb7f846305cfc90ac57c61f4852  
 $ git commit -m"something change..."  -n 
+【出现这个错误时：pre-commit hook failed (add –no-verify to bypass)】 
+$ git commit -m "something..." -n
  
 ```
 
