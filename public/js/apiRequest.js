@@ -2,7 +2,7 @@ import $ from 'jquery';
 
 //后台接口地址
 let interfaceUrl = 'http://10.52.200.23/';
-//let interfaceUrl = 'http://localhost:8000';
+// let interfaceUrl = 'http://localhost/';
 //返回数据
 let retData = null;
 
@@ -34,7 +34,7 @@ const apiRequest = {
    *       "" 返回空，证明网络等其他原因所致(与后台交互失败)
    */
   //同步post方式请求数据
-  postUrlData: function (url, param) {
+  postUrlData: function(url, param) {
     retData = null;
     let paramFormat = JSON.stringify(param);
     $.ajax(interfaceUrl + url, {
@@ -46,22 +46,22 @@ const apiRequest = {
       },
       timeout: 20000,
       async: false,
-      success: function (data) {
+      success: function(data) {
         if (data) {
           retData = data;
         } else {
           retData = null;
         }
       },
-      error: function (data) {
+      error: function(data) {
         retData = null;
-      }
+      },
     });
     return retData;
   },
 
   //异步post方式请求数据
-  postAsyncUrlData: function (url, param, callback) {
+  postAsyncUrlData: function(url, param, callback) {
     var paramFormat = JSON.stringify(param);
     $.ajax(interfaceUrl + url, {
       data: paramFormat,
@@ -72,19 +72,18 @@ const apiRequest = {
       },
       timeout: 20000,
       async: true,
-      success: function (data) {
+      success: function(data) {
         if (data) {
           callback(data);
         } else {
         }
       },
-      error: function (data) {
-      }
+      error: function(data) {},
     });
   },
 
   //异步get方式请求数据
-  getAsyncUrlData: function (url, param, callback) {
+  getAsyncUrlData: function(url, param, callback) {
     $.ajax(interfaceUrl + url, {
       data: param,
       dataType: 'json',
@@ -92,16 +91,14 @@ const apiRequest = {
       headers: {},
       timeout: 20000,
       async: true,
-      success: function (data) {
+      success: function(data) {
         if (data) {
           callback(data);
         } else {
         }
       },
-      error: function (data) {
-
-      }
+      error: function(data) {},
     });
-  }
+  },
 };
 export default apiRequest;

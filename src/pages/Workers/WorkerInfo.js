@@ -1,6 +1,8 @@
 import React from 'react';
 import { Table, Popconfirm, message, Icon, Modal, Form, Input, Button, Pagination } from 'antd';
 import $ from 'jquery';
+import apiRequest from '../../../public/js/apiRequest.js';
+import apiManager from '../../../public/js/apiManager.js';
 
 const FormItem = Form.Item;
 
@@ -136,21 +138,28 @@ export default class StudentTable extends React.Component {
     });
   };
 
-  componentDidMount() {
+  onLoad() {
+    const _this = this;
     this.setState({ loading: true });
-    $.ajax({
-      type: 'post',
-      url: 'http://localhost/account/v1/findAccountList?page=1&pageSize=10',
-      contentType: 'application/json; charset=utf-8',
-      datatype: 'json',
-      data: JSON.stringify({}),
-    }).then(data => {
-      this.setState({
-        loading: false,
-        itemList: data.rows,
-        total: data.total,
-      });
+    console.log(apiManager.findAccountList);
+    apiRequest.postAsyncUrlData(apiManager.findAccountList, {}, function(data) {
+      console.log(data.result);
+      if (data.result == 1) {
+        console.log(data.rows);
+        _this.setState({
+          loading: false,
+          itemList: data.rows,
+          total: data.total,
+        });
+        console.log(data.msg);
+      } else {
+        console.log(data.msg);
+      }
     });
+  }
+
+  componentDidMount() {
+    this.onLoad();
   }
 
   //分页点击事件
