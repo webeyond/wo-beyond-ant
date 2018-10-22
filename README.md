@@ -45,6 +45,18 @@ $ npm start         # 访问 http://localhost:8000
 ```
 
 
+### 国内建议使用cnpm效率更高
+```bash
+$ npm install -g cnpm --registry=https://registry.npm.taobao.org --save
+$ cnpm -v            # 检查是否安装成功
+$ cnpm install
+$ cnpm install --save jquery
+$ cnpm install echarts --save
+$ cnpm install echarts-for-react --save
+$ cnpm start         # 访问 http://localhost:8000
+```
+
+
 ### Git常用命令
 ```bash
 $ git add -A
