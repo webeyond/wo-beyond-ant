@@ -35,8 +35,8 @@
 
 ### 使用命令行
 ```bash
-$ git clone https://github.com/webeyond/wo-beyond-ant-clean.git --depth=1
-$ cd wo-beyond-ant-clean
+$ git clone https://github.com/webeyond/wo-beyond-ant.git --depth=1
+$ cd wo-beyond-ant
 $ npm install
 $ npm install --save jquery
 $ npm install echarts --save
@@ -61,15 +61,15 @@ $ cnpm start         # 访问 http://localhost:8000
 ```bash
 $ git add -A
 $ git commit -m "first commit"
-$ git remote add origin https://github.com/webeyond/wo-beyond-ant-clean.git
+$ git remote add origin https://github.com/webeyond/wo-beyond-ant.git
 $ git push -u origin master
 
 【修改远程仓库】
-$ git remote set-url --push origin https://github.com/webeyond/wo-beyond-ant-clean.git  
+$ git remote set-url --push origin https://github.com/webeyond/wo-beyond-ant.git  
 【[remote rejected] master -> master (shallow update not allowed)错误时使用】
 $ git fetch --unshallow origin  
 【拉取远程仓库并重命名】
-git clone --depth=1 https://github.com/webeyond/wo-beyond-ant-clean.git my-project
+git clone --depth=1 https://github.com/webeyond/wo-beyond-ant.git my-project
 【还原到历史提交节点】
 $ git reset  --hard commit_id  
 $ git reset  --hard 0dc1ec4c37d13bb7f846305cfc90ac57c61f4852  
