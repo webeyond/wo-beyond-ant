@@ -1,8 +1,8 @@
 import $ from 'jquery';
 
 //后台接口地址
-let interfaceUrl = 'http://10.52.200.23/';
-// let interfaceUrl = 'http://localhost/';
+// let interfaceUrl = 'http://10.52.200.23/';
+let interfaceUrl = 'http://localhost/';
 //返回数据
 let retData = null;
 
