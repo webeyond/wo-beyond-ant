@@ -4,6 +4,8 @@ import { fakeAccountLogin, getFakeCaptcha } from '@/services/api';
 import { setAuthority } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';
 import { reloadAuthorized } from '@/utils/Authorized';
+import apiRequest from '../../public/js/apiRequest.js';
+import apiManager from '../../public/js/apiManager.js';
 
 export default {
   namespace: 'login',
@@ -14,7 +16,30 @@ export default {
 
   effects: {
     *login({ payload }, { call, put }) {
-      const response = yield call(fakeAccountLogin, payload);
+      console.log(payload);
+      const { password, userName, type } = payload;
+      let response = {
+        status: 'error',
+        type,
+        currentAuthority: 'guest',
+      };
+      //调用自己的登录接口
+      const data = apiRequest.postUrlData(
+        apiManager.login,
+        { operatorname: userName, passwd: password },
+        function(data) {}
+      );
+      console.log(data);
+      if (data.result == '1') {
+        response = {
+          status: 'ok',
+          type,
+          currentAuthority: 'admin',
+        };
+      }
+
+      // 原有写死的登录
+      // const response = yield call(fakeAccountLogin, payload);
       yield put({
         type: 'changeLoginStatus',
         payload: response,
