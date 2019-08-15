@@ -39,6 +39,9 @@ import 'echarts/theme/macarons';
 import styles from './Analysis.less';
 import $ from 'jquery';
 import { connect } from 'dva';
+//引入常量URL
+import apiRequest from '../../../public/js/apiRequest.js';
+import apiManager from '../../../public/js/apiManager.js';
 
 class Analysis extends Component {
   constructor(props) {
@@ -49,15 +52,12 @@ class Analysis extends Component {
   }
 
   componentDidMount() {
+    //获取分区销售量【中间左侧】
     var orderscountchart = echarts.init(document.getElementById('ordercountchart'), 'macarons');
-    $.ajax({
-      type: 'post',
-      url: 'http://localhost/statistics/v1/selectSignCustomerCount',
-      contentType: 'application/json; charset=utf-8',
-      datatype: 'json',
-      data: JSON.stringify({}),
-    }).then(data => {
-      $.get('http://localhost:8000/shanghai.json', function(shhJson) {
+    apiRequest.postAsyncUrlData(apiManager.selectSignCustomerCount, {}, function(data) {
+      const HOST = window.location.host;
+      console.log(HOST);
+      $.get('http://' + HOST + '/shanghai.json', function(shhJson) {
         orderscountchart.hideLoading();
         echarts.registerMap('shanghai', shhJson);
         var orderscountoption = {
@@ -148,14 +148,9 @@ class Analysis extends Component {
       });
     });
 
+    //获取销售TOP5[中间右侧]
     var topfive = echarts.init(document.getElementById('topfive'), 'macarons');
-    $.ajax({
-      type: 'post',
-      url: 'http://localhost/statistics/v1/selectAccountTopFive',
-      contentType: 'application/json; charset=utf-8',
-      datatype: 'json',
-      data: JSON.stringify({}),
-    }).then(data => {
+    apiRequest.postAsyncUrlData(apiManager.selectAccountTopFive, {}, function(data) {
       var names = [];
       var sales = [];
       var photos = [];
@@ -255,14 +250,9 @@ class Analysis extends Component {
       topfive.setOption(topfiveoption);
     });
 
+    //获取各区签约数量【最上面折线图】
     var areatime = echarts.init(document.getElementById('areatime'), 'macarons');
-    $.ajax({
-      type: 'post',
-      url: 'http://localhost/statistics/v1/selectDistrictSignCount',
-      contentType: 'application/json; charset=utf-8',
-      datatype: 'json',
-      data: JSON.stringify({}),
-    }).then(data => {
+    apiRequest.postAsyncUrlData(apiManager.selectDistrictSignCount, {}, function(data) {
       var names = [];
       var values = [];
 
@@ -427,14 +417,9 @@ class Analysis extends Component {
       areatime.setOption(areatimeoption);
     });
 
+    //最热套餐TOP5【右下角】
     var topcard = echarts.init(document.getElementById('topcard'), 'macarons');
-    $.ajax({
-      type: 'post',
-      url: 'http://localhost/statistics/v1/selectProdTopFive',
-      contentType: 'application/json; charset=utf-8',
-      datatype: 'json',
-      data: JSON.stringify({}),
-    }).then(data => {
+    apiRequest.postAsyncUrlData(apiManager.selectProdTopFive, {}, function(data) {
       var topcardoption = {
         backgroundColor: '#ffffff',
 
@@ -518,14 +503,19 @@ class Analysis extends Component {
       topcard.setOption(topcardoption);
     });
 
+    /* $.ajax({
+       type: 'post',
+       url: 'http://localhost/statistics/v1/selectProdTopFive',
+       contentType: 'application/json; charset=utf-8',
+       datatype: 'json',
+       data: JSON.stringify({}),
+     }).then(data => {
+
+     });*/
+
+    //靓号热度分析[左下角]
     var topnum = echarts.init(document.getElementById('topnum'), 'macarons');
-    $.ajax({
-      type: 'post',
-      url: 'http://localhost/statistics/v1/selectSerialHeatAnalysis',
-      contentType: 'application/json; charset=utf-8',
-      datatype: 'json',
-      data: JSON.stringify({}),
-    }).then(data => {
+    apiRequest.postAsyncUrlData(apiManager.selectSerialHeatAnalysis, {}, function(data) {
       var name = [];
       var districtArray = [];
       var countsArray = [];
@@ -621,6 +611,15 @@ class Analysis extends Component {
       };
       topnum.setOption(topnumoption);
     });
+    /*$.ajax({
+      type: 'post',
+      url: 'http://localhost/statistics/v1/selectSerialHeatAnalysis',
+      contentType: 'application/json; charset=utf-8',
+      datatype: 'json',
+      data: JSON.stringify({}),
+    }).then(data => {
+
+    });*/
   }
 
   render() {
