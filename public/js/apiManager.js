@@ -1,6 +1,12 @@
 export default {
   /*调用全部用户列表*/
-  findAccountList: '/account/v1/findAccountList?page=1&pageSize=10',
+  findAccountList: '/account/v1/findAccountList',
+  /*删除用户*/
+  deleteAccount: '/account/v1/deleteAccount',
+  /*新增用户*/
+  insertAccount: '/account/v1/insertAccount',
+  /*修改用户*/
+  updateAccount: '/account/v1/updateAccount',
   /*登录*/
   login: '/v1/login',
   /*获取签约用户数量*/
@@ -13,4 +19,8 @@ export default {
   selectProdTopFive: '/statistics/v1/selectProdTopFive',
   /*获取靓号热度分析*/
   selectSerialHeatAnalysis: '/statistics/v1/selectSerialHeatAnalysis',
+  /*获取签约漏斗图*/
+  selectSignFunnelCount: '/statistics/v1/selectSignFunnelCount',
+  /*获取订单列表*/
+  selectOrderList: '/statistics/v1/selectOrderList',
 };

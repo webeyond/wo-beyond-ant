@@ -55,9 +55,7 @@ class Analysis extends Component {
     //获取分区销售量【中间左侧】
     var orderscountchart = echarts.init(document.getElementById('ordercountchart'), 'macarons');
     apiRequest.postAsyncUrlData(apiManager.selectSignCustomerCount, {}, function(data) {
-      const HOST = window.location.host;
-      console.log(HOST);
-      $.get('http://' + HOST + '/shanghai.json', function(shhJson) {
+      $.get(apiRequest.getHost()+ '/shanghai.json', function(shhJson) {
         orderscountchart.hideLoading();
         echarts.registerMap('shanghai', shhJson);
         var orderscountoption = {

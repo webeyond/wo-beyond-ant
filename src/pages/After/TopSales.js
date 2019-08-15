@@ -37,13 +37,16 @@ import 'echarts/lib/component/title';
 import 'echarts/theme/macarons';
 
 import $ from 'jquery';
+//引入常量URL
+import apiRequest from '../../../public/js/apiRequest.js';
+import apiManager from '../../../public/js/apiManager.js';
 
 class TopSales extends Component {
   componentDidMount() {
     var topcard = echarts.init(document.getElementById('topcard'), 'macarons');
     $.ajax({
       type: 'post',
-      url: 'http://localhost/statistics/v1/selectProdTopFive',
+      url: apiRequest.getUrl(apiManager.selectProdTopFive),
       contentType: 'application/json; charset=utf-8',
       datatype: 'json',
       data: JSON.stringify({}),
@@ -132,7 +135,7 @@ class TopSales extends Component {
     var topnum = echarts.init(document.getElementById('topnum'), 'macarons');
     $.ajax({
       type: 'post',
-      url: 'http://localhost/statistics/v1/selectSerialHeatAnalysis',
+      url: apiRequest.getUrl(apiManager.selectSerialHeatAnalysis),
       contentType: 'application/json; charset=utf-8',
       datatype: 'json',
       data: JSON.stringify({}),

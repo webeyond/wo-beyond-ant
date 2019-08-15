@@ -2,6 +2,9 @@ import React, { PureComponent } from 'react';
 import { Table, Pagination } from 'antd';
 import $ from 'jquery';
 import 'whatwg-fetch';
+//引入常量URL
+import apiRequest from '../../../public/js/apiRequest.js';
+import apiManager from '../../../public/js/apiManager.js';
 
 class OrderDetail extends PureComponent {
   constructor(props) {
@@ -20,7 +23,7 @@ class OrderDetail extends PureComponent {
     this.setState({ loading: true });
     $.ajax({
       type: 'post',
-      url: 'http://localhost/statistics/v1/selectOrderList?page=1&pageSize=10',
+      url: apiRequest.getUrl(apiManager.selectOrderList)+'?page=1&pageSize=10',
       contentType: 'application/json; charset=utf-8',
       datatype: 'json',
       data: JSON.stringify({}),
@@ -40,7 +43,7 @@ class OrderDetail extends PureComponent {
       page: page,
     });
     $.ajax({
-      url: 'http://localhost/statistics/v1/selectOrderList?page=' + page + '&pageSize=' + pageSize,
+      url: apiRequest.getUrl(apiManager.selectOrderList)+'?page=' + page + '&pageSize=' + pageSize,
       type: 'POST',
       contentType: 'application/json; charset=utf-8',
       datatype: 'json',

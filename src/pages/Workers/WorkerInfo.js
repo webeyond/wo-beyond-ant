@@ -79,10 +79,10 @@ export default class StudentTable extends React.Component {
   // 7 添加
   onAdd = fields => {
     console.log(fields);
-    let url = 'http://localhost/account/v1/';
+    let url = apiRequest.getInterfaceHost();
 
-    if (this.state.edtIndex === -1) url += 'insertAccount';
-    else url += 'updateAccount';
+    if (this.state.edtIndex === -1) url += apiManager.insertAccount;
+    else url += apiManager.updateAccount;
     this.setState({ loading: true });
     $.ajax({
       type: 'post',
@@ -92,21 +92,22 @@ export default class StudentTable extends React.Component {
       data: JSON.stringify(fields),
     }).then(data => {
       if (data.result == 1) {
-        const { itemList, edtIndex } = this.state;
-        console.log(itemList);
-        let dataSource = [];
-        if (edtIndex == -1) {
-          dataSource = [fields, ...itemList];
-        } else {
-          itemList[edtIndex] = fields;
-          dataSource = [...itemList];
-        }
-        message.success('操作成功');
+        this.refreshList();
+        /* const { itemList, edtIndex } = this.state;
+         console.log(itemList);
+         let dataSource = [];
+         if (edtIndex == -1) {
+           dataSource = [fields, ...itemList];
+         } else {
+           itemList[edtIndex] = fields;
+           dataSource = [...itemList];
+         }*/
         this.setState({
-          itemList: dataSource,
           modalVisible: false,
           loading: false,
         });
+
+        message.success('操作成功');
       } else {
         message.error('操作失败，请重试。');
       }
@@ -117,20 +118,23 @@ export default class StudentTable extends React.Component {
   onDelete = index => {
     console.log(index);
     const operatorid = this.state.itemList[index].operatorid;
+    console.log(this.state.itemList[index]);
 
     $.ajax({
       type: 'post',
-      url: 'http://localhost/account/v1/deleteAccount',
+      url: apiRequest.getUrl(apiManager.deleteAccount),
       contentType: 'application/json; charset=utf-8',
       datatype: 'json',
       data: JSON.stringify({ operatorid }),
     }).then(data => {
       if (data.result == 1) {
-        const dataSource = [...this.state.itemList];
+        console.log("成功删除" + operatorid);
+/*        const dataSource = [...this.state.itemList];
         dataSource.splice(index, 1); //splice从index行删除，1代表删除几行
         this.setState({
           itemList: dataSource,
-        });
+        });*/
+        this.refreshList();
         message.success(data.msg);
       } else {
         message.error(data.msg);
@@ -142,7 +146,7 @@ export default class StudentTable extends React.Component {
     const _this = this;
     this.setState({ loading: true });
     console.log(apiManager.findAccountList);
-    apiRequest.postAsyncUrlData(apiManager.findAccountList, {}, function(data) {
+    apiRequest.postAsyncUrlData(apiManager.findAccountList+'?page=1&pageSize=10', {}, function(data) {
       console.log(data.result);
       if (data.result == 1) {
         console.log(data.rows);
@@ -164,12 +168,13 @@ export default class StudentTable extends React.Component {
 
   //分页点击事件
   getPages = (page, pageSize) => {
+    console.log("分页查询开始..."+page+pageSize);
     this.setState({
       loading: true,
       page: page,
     });
     $.ajax({
-      url: 'http://localhost/account/v1/findAccountList?page=' + page + '&pageSize=' + pageSize,
+      url: apiRequest.getUrl(apiManager.findAccountList)+'?page=' + page + '&pageSize=' + pageSize,
       type: 'POST',
       contentType: 'application/json; charset=utf-8',
       datatype: 'json',
@@ -182,6 +187,24 @@ export default class StudentTable extends React.Component {
       });
     });
   };
+
+  /*刷新列表*/
+  refreshList() {
+    console.log("开始刷新列表...");
+    $.ajax({
+      url: apiRequest.getUrl(apiManager.findAccountList)+'?page=' + this.state.page + '&pageSize=10',
+      type: 'POST',
+      contentType: 'application/json; charset=utf-8',
+      datatype: 'json',
+      data: JSON.stringify({}),
+    }).then(data => {
+      this.setState({
+        itemList: data.rows,
+        total: data.total,
+        loading: false,
+      });
+      console.log("列表刷新成功...");
+    });  }
 
   render() {
     const dataSource = this.state.itemList;

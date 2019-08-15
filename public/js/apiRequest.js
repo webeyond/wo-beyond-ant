@@ -100,5 +100,17 @@ const apiRequest = {
       error: function(data) {},
     });
   },
+  //获取接口路径
+  getUrl: function(url) {
+    return interfaceUrl + url;
+  },
+  //获取接口HOST(ip+端口)
+  getInterfaceHost: function() {
+    return interfaceUrl;
+  },
+  //获取系统HOST(ip+端口)
+  getHost:function () {
+    return 'http://' +window.location.host;
+  }
 };
 export default apiRequest;

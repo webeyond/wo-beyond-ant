@@ -11,6 +11,9 @@ import 'echarts/lib/component/title';
 // 使用样式
 import 'echarts/theme/macarons';
 import $ from 'jquery';
+//引入常量URL
+import apiRequest from '../../../public/js/apiRequest.js';
+import apiManager from '../../../public/js/apiManager.js';
 
 class Funnel extends Component {
   constructor(props) {
@@ -29,13 +32,7 @@ class Funnel extends Component {
 
   componentDidMount() {
     var funnelchart = echarts.init(document.getElementById('funnelchart'), 'macarons');
-    $.ajax({
-      type: 'post',
-      url: 'http://localhost/statistics/v1/selectSignFunnelCount',
-      contentType: 'application/json; charset=utf-8',
-      datatype: 'json',
-      data: JSON.stringify({}),
-    }).then(data => {
+    apiRequest.postAsyncUrlData(apiManager.selectSignFunnelCount, {}, function(data) {
       var funneloption = {
         title: {
           text: '订单漏斗图',
@@ -133,6 +130,15 @@ class Funnel extends Component {
         });
       });
     });
+    /*$.ajax({
+      type: 'post',
+      url: 'http://localhost/statistics/v1/selectSignFunnelCount',
+      contentType: 'application/json; charset=utf-8',
+      datatype: 'json',
+      data: JSON.stringify({}),
+    }).then(data => {
+
+    });*/
   }
 
   render() {

@@ -37,18 +37,21 @@ import 'echarts/lib/component/title';
 import 'echarts/theme/macarons';
 
 import $ from 'jquery';
+//引入常量URL
+import apiRequest from '../../../public/js/apiRequest.js';
+import apiManager from '../../../public/js/apiManager.js';
 
 class CountMap extends Component {
   componentDidMount() {
     var orderscountchart = echarts.init(document.getElementById('ordercountchart'), 'macarons');
     $.ajax({
       type: 'post',
-      url: 'http://localhost/statistics/v1/selectSignCustomerCount',
+      url: apiRequest.getUrl(apiManager.selectSignCustomerCount),
       contentType: 'application/json; charset=utf-8',
       datatype: 'json',
       data: JSON.stringify({}),
     }).then(data => {
-      $.get('http://localhost:8000/shanghai.json', function(shhJson) {
+      $.get(apiRequest.getHost()+'/shanghai.json', function(shhJson) {
         orderscountchart.hideLoading();
         echarts.registerMap('shanghai', shhJson);
         var orderscountoption = {

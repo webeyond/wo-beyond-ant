@@ -36,13 +36,16 @@ import 'echarts/lib/component/title';
 // 使用样式
 import 'echarts/theme/macarons';
 import $ from 'jquery';
+//引入常量URL
+import apiRequest from '../../../public/js/apiRequest.js';
+import apiManager from '../../../public/js/apiManager.js';
 
 class SalesByTime extends Component {
   componentDidMount() {
     var areatime = echarts.init(document.getElementById('areatime'), 'macarons');
     $.ajax({
       type: 'post',
-      url: 'http://localhost/statistics/v1/selectDistrictSignCount',
+      url: apiRequest.getUrl(apiManager.selectDistrictSignCount),
       contentType: 'application/json; charset=utf-8',
       datatype: 'json',
       data: JSON.stringify({}),
