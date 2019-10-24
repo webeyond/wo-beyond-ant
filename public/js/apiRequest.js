@@ -1,8 +1,9 @@
 import $ from 'jquery';
 
 //后台接口地址
-let interfaceUrl = 'http://192.168.77.128:8888/';
-// let interfaceUrl = 'http://localhost:8888/';
+let interfaceUrl = 'http://47.100.30.242:8888';
+// let interfaceUrl = 'http://192.168.77.128:8888';
+// let interfaceUrl = 'http://localhost:8888';
 //返回数据
 let retData = null;
 
@@ -109,8 +110,8 @@ const apiRequest = {
     return interfaceUrl;
   },
   //获取系统HOST(ip+端口)
-  getHost:function () {
-    return 'http://' +window.location.host;
-  }
+  getHost: function() {
+    return 'http://' + window.location.host;
+  },
 };
 export default apiRequest;
